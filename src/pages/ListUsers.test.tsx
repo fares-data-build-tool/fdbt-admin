@@ -75,21 +75,14 @@ const usersMock: UserType[] = [
 ];
 
 describe('ListUsers Component', () => {
-    let getUserPoolListSpy;
-    let listUsersInPoolSpy;
-
     beforeEach(() => {
         jest.spyOn(cognito, 'getCognitoClient').mockImplementation(() =>
             Promise.resolve(new CognitoIdentityServiceProvider()),
         );
 
-        getUserPoolListSpy = jest
-            .spyOn(cognito, 'getUserPoolList')
-            .mockImplementation(() => Promise.resolve(userPoolsMock));
+        jest.spyOn(cognito, 'getUserPoolList').mockImplementation(() => Promise.resolve(userPoolsMock));
 
-        listUsersInPoolSpy = jest
-            .spyOn(cognito, 'listUsersInPool')
-            .mockImplementation(() => Promise.resolve(usersMock));
+        jest.spyOn(cognito, 'listUsersInPool').mockImplementation(() => Promise.resolve(usersMock));
     });
 
     test('displays email for each user', async () => {
