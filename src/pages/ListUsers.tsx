@@ -1,10 +1,9 @@
 import { H1 } from '@govuk-react/heading';
 import { Fragment, ReactElement, useEffect, useState } from 'react';
-import { CognitoIdentityServiceProvider } from 'aws-sdk';
-import { Auth } from 'aws-amplify';
-import { AttributeListType, ListUsersRequest, UsersListType } from 'aws-sdk/clients/cognitoidentityserviceprovider';
+import { AttributeListType, UsersListType } from 'aws-sdk/clients/cognitoidentityserviceprovider';
 import Table from '@govuk-react/table';
-import { ATTRIBUTE_MAP, AWS_REGION, MAIN_USER_POOL_PREFIX, STATUS_MAP } from '../constants';
+import { ATTRIBUTE_MAP, MAIN_USER_POOL_PREFIX, STATUS_MAP } from '../constants';
+import { getCognitoClient, getUserPoolList, listUsersInPool } from '../data/cognito';
 
 const formatAttributes = (attributes: AttributeListType) => {
     return attributes
@@ -24,21 +23,16 @@ const ListUsers = (): ReactElement => {
 
     useEffect(() => {
         const getUsers = async (): Promise<UsersListType> => {
-            const cognito = new CognitoIdentityServiceProvider({
-                region: AWS_REGION,
-                credentials: await Auth.currentUserCredentials(),
-            });
+            const cognito = await getCognitoClient();
 
-            const userPoolList = await cognito.listUserPools({ MaxResults: 2 }).promise();
-            const mainUserPool = userPoolList?.UserPools?.find((pool) => pool.Name?.startsWith(MAIN_USER_POOL_PREFIX));
+            const userPoolList = await getUserPoolList(cognito);
+            const mainUserPool = userPoolList?.find((pool) => pool.Name?.startsWith(MAIN_USER_POOL_PREFIX));
 
             if (mainUserPool?.Id) {
-                const listUserParams: ListUsersRequest = {
-                    UserPoolId: mainUserPool.Id,
-                };
-
-                return (await cognito.listUsers(listUserParams).promise()).Users || [];
+                return listUsersInPool(cognito, mainUserPool.Id);
             }
+
+            console.error('Failed to retrieve main user pool data');
 
             return [];
         };
@@ -46,7 +40,6 @@ const ListUsers = (): ReactElement => {
         getUsers()
             .then((data) => setUsers(data))
             .catch((err) => {
-                // eslint-disable-next-line no-console
                 console.error(err);
 
                 setUsers([]);
