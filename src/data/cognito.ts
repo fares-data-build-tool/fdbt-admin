@@ -12,7 +12,7 @@ export const getCognitoClient = async (): Promise<CognitoIdentityServiceProvider
     new CognitoIdentityServiceProvider({ region: AWS_REGION, credentials: await Auth.currentUserCredentials() });
 
 export const getUserPoolList = async (cognito: CognitoIdentityServiceProvider): Promise<UserPoolDescriptionType[]> => {
-    const params: ListUserPoolsRequest = { MaxResults: 2 };
+    const params: ListUserPoolsRequest = { MaxResults: 5 };
 
     const listUserPoolsResponse = await cognito.listUserPools(params).promise();
 

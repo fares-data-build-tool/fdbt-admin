@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { render, screen } from '@testing-library/react';
 import { CognitoIdentityServiceProvider } from 'aws-sdk';
 import { UserPoolDescriptionType, UserType } from 'aws-sdk/clients/cognitoidentityserviceprovider';
