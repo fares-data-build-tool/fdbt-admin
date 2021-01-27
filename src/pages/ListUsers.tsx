@@ -1,6 +1,6 @@
 import { H1 } from '@govuk-react/heading';
 import { Fragment, ReactElement, useEffect, useState } from 'react';
-import { AttributeListType, UsersListType } from 'aws-sdk/clients/cognitoidentityserviceprovider';
+import { AttributeListType, UsersListType, UserType } from 'aws-sdk/clients/cognitoidentityserviceprovider';
 import Table from '@govuk-react/table';
 import { ATTRIBUTE_MAP, STATUS_MAP } from '../constants';
 import { listUsersInPool } from '../data/cognito';
@@ -18,6 +18,9 @@ const formatAttributes = (attributes: AttributeListType) => {
             </Fragment>
         ));
 };
+
+const getAttributeValue = (user: UserType, attributeName: string): string | undefined =>
+    user?.Attributes?.find((item) => item.Name === attributeName)?.Value;
 
 const ListUsers = (): ReactElement => {
     const [users, setUsers] = useState<UsersListType>([]);
@@ -44,11 +47,12 @@ const ListUsers = (): ReactElement => {
             });
     }, []);
 
-    const completedRegisteredUsers = users.filter((user) => {
+    const nonTestUsers = users?.filter((user) => !getAttributeValue(user, 'custom:noc')?.includes('IWBusCo'));
+    const completedRegisteredUsers = nonTestUsers.filter((user) => {
         return user?.UserStatus === 'CONFIRMED';
     });
 
-    const pendingRegisteredUsers = users.filter((user) => {
+    const pendingRegisteredUsers = nonTestUsers.filter((user) => {
         return user?.UserStatus === 'FORCE_CHANGE_PASSWORD';
     });
 
@@ -69,7 +73,7 @@ const ListUsers = (): ReactElement => {
                         <b>{pendingRegisteredUsers.length}</b>
                     </Table.Cell>
                     <Table.Cell>
-                        <b>{users.length}</b>
+                        <b>{nonTestUsers.length}</b>
                     </Table.Cell>
                 </Table.Row>
             </Table>
@@ -81,7 +85,7 @@ const ListUsers = (): ReactElement => {
                 </Table.Row>
                 {users.map((user) => (
                     <Table.Row key={user.Username}>
-                        <Table.Cell>{user.Attributes?.find((item) => item.Name === 'email')?.Value}</Table.Cell>
+                        <Table.Cell>{getAttributeValue(user, 'email')}</Table.Cell>
                         <Table.Cell>{formatAttributes(user.Attributes || [])}</Table.Cell>
                         <Table.Cell>{STATUS_MAP[user.UserStatus || ''] ?? 'Unknown'}</Table.Cell>
                     </Table.Row>

@@ -73,6 +73,59 @@ const usersMock: UserType[] = [
     },
 ];
 
+const usersMockWithIWBusCoNoc: UserType[] = [
+    {
+        Username: '111111-aaaaaa-111111',
+        Attributes: [
+            {
+                Name: 'email',
+                Value: 'test@example.com',
+            },
+            {
+                Name: 'custom:noc',
+                Value: 'IWBusCo',
+            },
+        ],
+        UserStatus: 'CONFIRMED',
+    },
+    {
+        Username: '222222-bbbbbb-222222',
+        Attributes: [
+            {
+                Name: 'email',
+                Value: 'test2@example.com',
+            },
+            {
+                Name: 'custom:noc',
+                Value: '2TEST',
+            },
+        ],
+        UserStatus: 'CONFIRMED',
+    },
+    {
+        Username: '333333-cccccc-333333',
+        Attributes: [
+            {
+                Name: 'email',
+                Value: 'test3@example.com',
+            },
+            {
+                Name: 'custom:noc',
+                Value: 'SCHEME1',
+            },
+            {
+                Name: 'custom:schemeOperator',
+                Value: 'Awesome Scheme Name',
+            },
+            {
+                Name: 'custom:schemeRegionCode',
+                Value: 'Y',
+            },
+        ],
+        UserStatus: 'FORCE_CHANGE_PASSWORD',
+    },
+];
+
 describe('ListUsers Component', () => {
     beforeEach(() => {
         jest.spyOn(cognito, 'getCognitoClient').mockImplementation(() =>
@@ -93,6 +146,29 @@ describe('ListUsers Component', () => {
     test.each(registrationCountTableData)(
         '%s column at position %i displays value %s',
         async (header, columnPosition, value) => {
+            render(<ListUsers />);
+
+            const headerRow = (await screen.findAllByRole('row'))[0];
+            const columnHeader = within(headerRow).getAllByRole('columnheader')[columnPosition as number];
+            const valueRow = (await screen.findAllByRole('row'))[1];
+            const cell = within(valueRow).getAllByRole('cell')[columnPosition as number];
+
+            expect(columnHeader).toHaveTextContent(header as string);
+            expect(cell).toHaveTextContent(value as string);
+        },
+    );
+
+    const registrationCountTableDataExcludingIWBusCoUsers = [
+        ['Completed Registrations', 0, '1'],
+        ['Pending Registrations', 1, '1'],
+        ['Total Registrations', 2, '2'],
+    ];
+
+    test.each(registrationCountTableDataExcludingIWBusCoUsers)(
+        '%s column at position %i displays value %s, excluding users with IWBusCo NOC',
+        async (header, columnPosition, value) => {
+            jest.spyOn(cognito, 'listUsersInPool').mockImplementation(() => Promise.resolve(usersMockWithIWBusCoNoc));
+
             render(<ListUsers />);
 
             const headerRow = (await screen.findAllByRole('row'))[0];
