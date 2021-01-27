@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { CognitoIdentityServiceProvider } from 'aws-sdk';
 import { UserPoolDescriptionType, UserType } from 'aws-sdk/clients/cognitoidentityserviceprovider';
 import { MAIN_USER_POOL_PREFIX } from '../constants';
@@ -82,6 +82,30 @@ describe('ListUsers Component', () => {
         jest.spyOn(cognito, 'getUserPoolList').mockImplementation(() => Promise.resolve(userPoolsMock));
 
         jest.spyOn(cognito, 'listUsersInPool').mockImplementation(() => Promise.resolve(usersMock));
+    });
+
+    test('displays completed registrations', async () => {
+        render(<ListUsers />);
+
+        const row = (await screen.findAllByRole('row'))[1];
+        const cell = within(row).getAllByRole('cell')[0];
+        expect(cell).toHaveTextContent('2');
+    });
+
+    test('displays completed registrations', async () => {
+        render(<ListUsers />);
+
+        const row = (await screen.findAllByRole('row'))[1];
+        const cell = within(row).getAllByRole('cell')[1];
+        expect(cell).toHaveTextContent('1');
+    });
+
+    test('displays completed registrations', async () => {
+        render(<ListUsers />);
+
+        const row = (await screen.findAllByRole('row'))[1];
+        const cell = within(row).getAllByRole('cell')[2];
+        expect(cell).toHaveTextContent('3');
     });
 
     test('displays email for each user', async () => {

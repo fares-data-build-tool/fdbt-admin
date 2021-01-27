@@ -10,6 +10,7 @@
         "@govuk-react/hint-text": "^0.7.1",
         "@govuk-react/input": "^0.7.1",
         "@govuk-react/page": "^0.7.1",
+        "@govuk-react/paragraph": "^0.7.1",
         "@govuk-react/table": "^0.7.1",
         "@govuk-react/top-nav": "^0.7.1",
         "@testing-library/jest-dom": "^5.11.4",

@@ -1,8 +1,9 @@
 import { H1 } from '@govuk-react/heading';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import Button from '@govuk-react/button';
 import { useForm } from 'react-hook-form';
-import { addUserToPool, getCognitoClientAndUserPool } from '../data/cognito';
+import { addUserToPool } from '../data/cognito';
+import getCognitoClientAndUserPool from '../utils/cognito';
 
 export interface FormUser {
     email: string;
@@ -16,15 +17,26 @@ const formatNocs = (nocs: string): string =>
         .join('|');
 
 const AddUser = (): ReactElement => {
-    const { register, handleSubmit, reset } = useForm<FormUser>();
+    const { register, handleSubmit, formState, reset } = useForm<FormUser>();
+    const [createdUserEmail, setCreatedUserEmail] = useState('');
+    const [error, setError] = useState('');
     const onSubmit = async (formUser: FormUser) => {
+        console.log('TEST');
+        setCreatedUserEmail('');
+        setError('');
         const formattedUser = { ...formUser, nocs: formatNocs(formUser.nocs) };
+        reset();
         const { client, userPoolId } = await getCognitoClientAndUserPool();
         if (userPoolId) {
-            const response = await addUserToPool(client, userPoolId, formattedUser);
-            console.log(response);
+            try {
+                await addUserToPool(client, userPoolId, formattedUser);
+                setCreatedUserEmail(formUser.email);
+            } catch (err) {
+                setError((err as Error).message);
+            }
+            return;
         }
-        reset();
+        console.error('Failed to retrieve main user pool data');
     };
 
     return (
@@ -36,7 +48,7 @@ const AddUser = (): ReactElement => {
                 <input id="email" name="email" ref={register({ required: true })} />
                 <br />
                 <br />
-                <label htmlFor="email">User National Operator Code (NOC)</label>
+                <label htmlFor="nocs">User National Operator Code (NOC)</label>
                 <br />
                 <small>
                     If the user has multiple NOCs, enter a comma-separated list. For example, &apos;NOC1,NOC2,NOC3&apos;
@@ -45,7 +57,14 @@ const AddUser = (): ReactElement => {
                 <input id="nocs" name="nocs" ref={register({ required: true })} />
                 <br />
                 <br />
-                <Button>Submit</Button>
+                <Button disabled={formState.isSubmitting}>Submit</Button>
+                <br />
+                {createdUserEmail.length > 0 && (
+                    <div style={{ color: 'green' }}>
+                        Account created successfully for <b>{createdUserEmail}</b>
+                    </div>
+                )}
+                {error && <div style={{ color: 'red' }}>{error}</div>}
             </form>
         </>
     );

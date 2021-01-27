@@ -2,8 +2,9 @@ import { H1 } from '@govuk-react/heading';
 import { Fragment, ReactElement, useEffect, useState } from 'react';
 import { AttributeListType, UsersListType } from 'aws-sdk/clients/cognitoidentityserviceprovider';
 import Table from '@govuk-react/table';
-import { ATTRIBUTE_MAP, MAIN_USER_POOL_PREFIX, STATUS_MAP } from '../constants';
-import { getCognitoClient, getUserPoolList, listUsersInPool } from '../data/cognito';
+import { ATTRIBUTE_MAP, STATUS_MAP } from '../constants';
+import { listUsersInPool } from '../data/cognito';
+import getCognitoClientAndUserPool from '../utils/cognito';
 
 const formatAttributes = (attributes: AttributeListType) => {
     return attributes
@@ -23,13 +24,10 @@ const ListUsers = (): ReactElement => {
 
     useEffect(() => {
         const getUsers = async (): Promise<UsersListType> => {
-            const cognito = await getCognitoClient();
+            const { client, userPoolId } = await getCognitoClientAndUserPool();
 
-            const userPoolList = await getUserPoolList(cognito);
-            const mainUserPool = userPoolList?.find((pool) => pool.Name?.startsWith(MAIN_USER_POOL_PREFIX));
-
-            if (mainUserPool?.Id) {
-                return listUsersInPool(cognito, mainUserPool.Id);
+            if (userPoolId) {
+                return listUsersInPool(client, userPoolId);
             }
 
             console.error('Failed to retrieve main user pool data');
@@ -46,9 +44,35 @@ const ListUsers = (): ReactElement => {
             });
     }, []);
 
+    const completedRegisteredUsers = users.filter((user) => {
+        return user?.UserStatus === 'CONFIRMED';
+    });
+
+    const pendingRegisteredUsers = users.filter((user) => {
+        return user?.UserStatus === 'FORCE_CHANGE_PASSWORD';
+    });
+
     return (
         <>
             <H1>User List</H1>
+            <Table>
+                <Table.Row>
+                    <Table.CellHeader>Completed Registrations</Table.CellHeader>
+                    <Table.CellHeader>Pending Registrations</Table.CellHeader>
+                    <Table.CellHeader>Total Registrations</Table.CellHeader>
+                </Table.Row>
+                <Table.Row>
+                    <Table.Cell style={{ color: '#36B22E' }}>
+                        <b>{completedRegisteredUsers.length}</b>
+                    </Table.Cell>
+                    <Table.Cell style={{ color: '#FF6C00' }}>
+                        <b>{pendingRegisteredUsers.length}</b>
+                    </Table.Cell>
+                    <Table.Cell>
+                        <b>{users.length}</b>
+                    </Table.Cell>
+                </Table.Row>
+            </Table>
             <Table>
                 <Table.Row>
                     <Table.CellHeader>Email</Table.CellHeader>

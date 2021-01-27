@@ -7,13 +7,8 @@ import {
     UserPoolDescriptionType,
     UserType,
 } from 'aws-sdk/clients/cognitoidentityserviceprovider';
-import { AWS_REGION, MAIN_USER_POOL_PREFIX } from '../constants';
+import { AWS_REGION } from '../constants';
 import { FormUser } from '../pages/AddUser';
-
-interface CognitoClientAndUserPool {
-    client: CognitoIdentityServiceProvider;
-    userPoolId: string | undefined;
-}
 
 export const getCognitoClient = async (): Promise<CognitoIdentityServiceProvider> =>
     new CognitoIdentityServiceProvider({ region: AWS_REGION, credentials: await Auth.currentUserCredentials() });
@@ -24,13 +19,6 @@ export const getUserPoolList = async (cognito: CognitoIdentityServiceProvider): 
     const listUserPoolsResponse = await cognito.listUserPools(params).promise();
 
     return listUserPoolsResponse?.UserPools ?? [];
-};
-
-export const getCognitoClientAndUserPool = async (): Promise<CognitoClientAndUserPool> => {
-    const client = await getCognitoClient();
-    const userPoolList = await getUserPoolList(client);
-    const userPool = userPoolList?.find((pool) => pool.Name?.startsWith(MAIN_USER_POOL_PREFIX));
-    return { client, userPoolId: userPool?.Id };
 };
 
 export const listUsersInPool = async (
