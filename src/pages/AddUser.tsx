@@ -21,7 +21,6 @@ const AddUser = (): ReactElement => {
     const [createdUserEmail, setCreatedUserEmail] = useState('');
     const [error, setError] = useState('');
     const onSubmit = async (formUser: FormUser) => {
-        console.log('TEST');
         setCreatedUserEmail('');
         setError('');
         const formattedUser = { ...formUser, nocs: formatNocs(formUser.nocs) };
