@@ -22,6 +22,13 @@ const formatAttributes = (attributes: AttributeListType) => {
 const getAttributeValue = (user: UserType, attributeName: string): string | undefined =>
     user?.Attributes?.find((item) => item.Name === attributeName)?.Value;
 
+const sortByEmail = (a: UserType, b: UserType) => {
+    const aEmail = a.Attributes?.find((attribute) => attribute.Name === 'email')?.Value || 'z';
+    const bEmail = b.Attributes?.find((attribute) => attribute.Name === 'email')?.Value || 'z';
+
+    return aEmail.localeCompare(bEmail);
+};
+
 const ListUsers = (): ReactElement => {
     const [users, setUsers] = useState<UsersListType>([]);
 
@@ -39,7 +46,7 @@ const ListUsers = (): ReactElement => {
         };
 
         getUsers()
-            .then((data) => setUsers(data))
+            .then((data) => setUsers(data.sort(sortByEmail)))
             .catch((err) => {
                 console.error(err);
 
