@@ -84,29 +84,26 @@ describe('ListUsers Component', () => {
         jest.spyOn(cognito, 'listUsersInPool').mockImplementation(() => Promise.resolve(usersMock));
     });
 
-    test('displays completed registrations', async () => {
-        render(<ListUsers />);
+    const registrationCountTableData = [
+        ['Completed Registrations', 0, '2'],
+        ['Pending Registrations', 1, '1'],
+        ['Total Registrations', 2, '3'],
+    ];
 
-        const row = (await screen.findAllByRole('row'))[1];
-        const cell = within(row).getAllByRole('cell')[0];
-        expect(cell).toHaveTextContent('2');
-    });
+    test.each(registrationCountTableData)(
+        '%s column at position %i displays value %s',
+        async (header, columnPosition, value) => {
+            render(<ListUsers />);
 
-    test('displays completed registrations', async () => {
-        render(<ListUsers />);
+            const headerRow = (await screen.findAllByRole('row'))[0];
+            const columnHeader = within(headerRow).getAllByRole('columnheader')[columnPosition as number];
+            const valueRow = (await screen.findAllByRole('row'))[1];
+            const cell = within(valueRow).getAllByRole('cell')[columnPosition as number];
 
-        const row = (await screen.findAllByRole('row'))[1];
-        const cell = within(row).getAllByRole('cell')[1];
-        expect(cell).toHaveTextContent('1');
-    });
-
-    test('displays completed registrations', async () => {
-        render(<ListUsers />);
-
-        const row = (await screen.findAllByRole('row'))[1];
-        const cell = within(row).getAllByRole('cell')[2];
-        expect(cell).toHaveTextContent('3');
-    });
+            expect(columnHeader).toHaveTextContent(header as string);
+            expect(cell).toHaveTextContent(value as string);
+        },
+    );
 
     test('displays email for each user', async () => {
         render(<ListUsers />);

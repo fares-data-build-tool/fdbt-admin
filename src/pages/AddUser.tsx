@@ -20,6 +20,7 @@ const AddUser = (): ReactElement => {
     const { register, handleSubmit, formState, reset } = useForm<FormUser>();
     const [createdUserEmail, setCreatedUserEmail] = useState('');
     const [error, setError] = useState('');
+
     const onSubmit = async (formUser: FormUser) => {
         setCreatedUserEmail('');
         setError('');
@@ -58,7 +59,7 @@ const AddUser = (): ReactElement => {
                 <br />
                 <Button disabled={formState.isSubmitting}>Submit</Button>
                 <br />
-                {createdUserEmail.length > 0 && (
+                {createdUserEmail && (
                     <div style={{ color: 'green' }}>
                         Account created successfully for <b>{createdUserEmail}</b>
                     </div>
