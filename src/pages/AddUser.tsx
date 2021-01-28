@@ -26,17 +26,14 @@ const AddUser = (): ReactElement => {
         setError('');
         const formattedUser = { ...formUser, nocs: formatNocs(formUser.nocs) };
         reset();
-        const { client, userPoolId } = await getCognitoClientAndUserPool();
-        if (userPoolId) {
-            try {
-                await addUserToPool(client, userPoolId, formattedUser);
-                setCreatedUserEmail(formUser.email);
-            } catch (err) {
-                setError((err as Error).message);
-            }
-            return;
+
+        try {
+            const { client, userPoolId } = await getCognitoClientAndUserPool();
+            await addUserToPool(client, userPoolId, formattedUser);
+            setCreatedUserEmail(formUser.email);
+        } catch (err) {
+            setError((err as Error).message);
         }
-        console.error('Failed to retrieve main user pool data');
     };
 
     return (

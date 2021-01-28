@@ -36,13 +36,7 @@ const ListUsers = (): ReactElement => {
         const getUsers = async (): Promise<UsersListType> => {
             const { client, userPoolId } = await getCognitoClientAndUserPool();
 
-            if (userPoolId) {
-                return listUsersInPool(client, userPoolId);
-            }
-
-            console.error('Failed to retrieve main user pool data');
-
-            return [];
+            return listUsersInPool(client, userPoolId);
         };
 
         getUsers()
@@ -55,6 +49,7 @@ const ListUsers = (): ReactElement => {
     }, []);
 
     const nonTestUsers = users?.filter((user) => !getAttributeValue(user, 'custom:noc')?.includes('IWBusCo'));
+
     const completedRegisteredUsers = nonTestUsers.filter((user) => {
         return user?.UserStatus === 'CONFIRMED';
     });
