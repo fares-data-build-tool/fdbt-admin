@@ -2,6 +2,7 @@ import { CognitoIdentityServiceProvider } from 'aws-sdk';
 import { Auth } from 'aws-amplify';
 import {
     AdminCreateUserRequest,
+    AdminUpdateUserAttributesRequest,
     ListUserPoolsRequest,
     ListUsersRequest,
     UserPoolDescriptionType,
@@ -57,12 +58,18 @@ export const addUserToPool = async (
     userPoolId: string,
     formUser: FormUser,
 ): Promise<void> => {
-    const params: AdminCreateUserRequest = {
+    const createUserParams: AdminCreateUserRequest = {
         UserPoolId: userPoolId,
         Username: formUser.email,
         UserAttributes: [{ Name: 'custom:noc', Value: formUser.nocs }],
         TemporaryPassword: generateTemporaryPassword(),
     };
+    await cognito.adminCreateUser(createUserParams).promise();
 
-    await cognito.adminCreateUser(params).promise();
+    const updateAttributesParams: AdminUpdateUserAttributesRequest = {
+        UserPoolId: userPoolId,
+        Username: formUser.email,
+        UserAttributes: [{ Name: 'email_verified', Value: 'true' }],
+    };
+    await cognito.adminUpdateUserAttributes(updateAttributesParams).promise();
 };

@@ -51,7 +51,7 @@ describe('AddUsers Component', () => {
 
         userEvent.click(screen.getByText('Submit'));
 
-        expect(await screen.findByText('Invalid Email'));
+        expect(await screen.findByText('Invalid Email')).toBeTruthy();
     });
 
     test('error messages replace success messages', async () => {
@@ -73,7 +73,7 @@ describe('AddUsers Component', () => {
         userEvent.type(screen.getByRole('textbox', { name: /User National Operator Code/i }), '1TEST');
         userEvent.click(screen.getByText('Submit'));
 
-        expect(await screen.findByText('Invalid Email'));
+        expect(await screen.findByText('Invalid Email')).toBeTruthy();
         expect(screen.queryByText('Account created successfully for')).toBeNull();
     });
 });

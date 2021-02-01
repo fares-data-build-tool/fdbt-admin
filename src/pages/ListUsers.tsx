@@ -50,13 +50,9 @@ const ListUsers = (): ReactElement => {
 
     const nonTestUsers = users?.filter((user) => !getAttributeValue(user, 'custom:noc')?.includes('IWBusCo'));
 
-    const completedRegisteredUsers = nonTestUsers.filter((user) => {
-        return user?.UserStatus === 'CONFIRMED';
-    });
+    const completedRegisteredUsers = nonTestUsers.filter((user) => user?.UserStatus === 'CONFIRMED');
 
-    const pendingRegisteredUsers = nonTestUsers.filter((user) => {
-        return user?.UserStatus === 'FORCE_CHANGE_PASSWORD';
-    });
+    const pendingRegisteredUsers = nonTestUsers.filter((user) => user?.UserStatus === 'FORCE_CHANGE_PASSWORD');
 
     return (
         <>
